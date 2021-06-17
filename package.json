@@ -1,0 +1,24 @@
+{
+  "name": "json-to-excel",
+  "version": "1.0.0",
+  "description": "Converting JSON to Excel",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/princ-od-zmijavaca/json-to-excel.git"
+  },
+  "author": "Ivan Knezovic",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/princ-od-zmijavaca/json-to-excel/issues"
+  },
+  "homepage": "https://github.com/princ-od-zmijavaca/json-to-excel#readme",
+  "dependencies": {
+    "exceljs": "^4.2.1",
+    "express": "^4.17.1",
+    "flat": "^5.0.2"
+  }
+}
