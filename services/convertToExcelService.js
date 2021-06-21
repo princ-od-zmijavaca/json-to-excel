@@ -22,15 +22,36 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
     let flattenedJSONprops = APIservices.flattenJSONandGetProps(obj);
     let flattenedJSONvalues = APIservices.flattenJSONvalues(obj);
 
-    let existingPropsByDoctype;
-
+    let propsExistingOnDocument;
 
     const doctypeExists = txtFileService.docTypeExists(documentType);
     if (!doctypeExists) {
+        //#region Adding Fields To Document
         txtFileService.createDocumentType(documentType);
         txtFileService.addPropsToDoc(flattenedJSONprops, documentType);
+
+        // TODO: add those props to headers in xlsx file
+
+        //#endregion
     } else {
-        existingPropsByDoctype = txtFileService.getExistingProps(documentType).filter(e => e.length > 1);
+        //#region Updating Missing Fields On Document
+        propsExistingOnDocument = txtFileService.getExistingProps(documentType).filter(e => e.length > 1);
+
+        let missingPropsOnDocument = [];
+
+        flattenedJSONprops.forEach(element => {
+            if (!(propsExistingOnDocument.includes(element))) {
+                missingPropsOnDocument.push(element);
+            }
+        });
+
+        if (missingPropsOnDocument.length > 0) {
+            txtFileService.addPropsToDoc(missingPropsOnDocument, documentType);
+        }
+
+        // TODO: add those missing props to excel header
+
+        //#endregion
     }
 
 
@@ -55,27 +76,6 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
     }
 
     await workbook.xlsx.writeFile("ExcelFiles/main.xlsx");
-
-    // tu si sta , iznad
-
-    // let missingProps = [];
-
-    // filteredProps.forEach(element => {
-    //     if (!existingPropsByDoctype.includes(element)) {
-    //         missingProps.push(element);
-    //     }
-    // });
-
-    // if (missingProps.length > 0) {
-    //     txtFileService.addPropsToDoc(missingProps, documentType);
-    //     xlsxFileService.addColumnsToXLSX(missingProps, documentType);
-    // }
-
-
-    // const objectVals = Object.values(flatObject);
-
-    // xlsxFileService.getRowsFromJSON(documentType);
-    //Prepare to add rows
 
 }
 

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const APIservices = require("../services/APIservices");
 
 exports.docTypeExists = (documentType) => {
     const exists = fs.existsSync(`DocumentTypes/${documentType}.txt`);
@@ -23,7 +24,7 @@ exports.addPropsToDoc = (propsArr, documentType) => {
 }
 
 exports.txtFileNeedsUpdate = (JSONobj, documentType) => {
-    const incomingPropArr = Object.getOwnPropertyNames(JSONobj);
+    const incomingPropArr = APIservices.flattenJSONandGetProps(JSONobj);
     const existingProps = fs.readFileSync(path.join("DocumentTypes", `${documentType.toString()}.txt`), 'utf8', (err, data) => {
         if (err) {
             console.log("Error reading file");
