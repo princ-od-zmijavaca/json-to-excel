@@ -16,7 +16,7 @@ exports.getDocumentType = (JSONobj) => {
 exports.convertJSONobjectToExcel = async (obj, documentType) => {
 
     let workbook = new Excel.Workbook();
-    let worksheet = workbook.getWorksheet(documentType.toString());
+    let worksheet = workbook.getWorksheet(documentType);
 
     // 1 to 1, each prop is pair of another on same index
     let flattenedJSONprops = APIservices.flattenJSONandGetProps(obj);
@@ -26,15 +26,12 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
 
     const doctypeExists = txtFileService.docTypeExists(documentType);
     if (!doctypeExists) {
-        //#region Adding Fields To Document
+        //#region Adding Fields To Document And Creating Document
         txtFileService.createDocumentType(documentType);
         txtFileService.addPropsToDoc(flattenedJSONprops, documentType);
-
-        // TODO: add those props to headers in xlsx file
-
         //#endregion
     } else {
-        //#region Updating Missing Fields On Document
+        //#region Update Missing Fields On Txt File If Needed
         propsExistingOnDocument = txtFileService.getExistingProps(documentType).filter(e => e.length > 1);
 
         let missingPropsOnDocument = [];
@@ -48,34 +45,49 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
         if (missingPropsOnDocument.length > 0) {
             txtFileService.addPropsToDoc(missingPropsOnDocument, documentType);
         }
-
-        // TODO: add those missing props to excel header
-
         //#endregion
     }
 
 
     try {
-        fs.statSync("ExcelFiles/main.xlsx");
-        await workbook.xlsx.readFile("ExcelFiles/main.xlsx");
+        fs.statSync("ExcelFiles/export.xlsx");
+        await workbook.xlsx.readFile("ExcelFiles/export.xlsx");
     } catch (error) {
-        const newWorksheet = workbook.addWorksheet(documentType.toString());
+        const newWorksheet = workbook.addWorksheet("test");
         newWorksheet.columns = xlsxFileService.extractColumnsFromJSON(obj);
-        await workbook.xlsx.writeFile("ExcelFiles/main.xlsx");
+        await workbook.xlsx.writeFile("ExcelFiles/export.xlsx");
+        console.log("Error finding file -> main.xlsx", error.message);
+        console.log("CREATE FILE ExcelFiles/export.xlsx");
     }
 
-    await workbook.xlsx.readFile("ExcelFiles/main.xlsx");
+    await workbook.xlsx.readFile("ExcelFiles/export.xlsx");
 
-    worksheet = workbook.getWorksheet(documentType.toString());
+    worksheet = workbook.getWorksheet(documentType);
 
     if (!worksheet) {
-        let newWorksheet = workbook.addWorksheet(documentType.toString());
-        newWorksheet.columns = xlsxFileService.extractColumnsFromJSON(obj);
-    } else {
-        console.log("Postojeci worksheet");
-    }
+        console.log("Nema worksheeta");
+        let newWorksheet = workbook.addWorksheet(documentType);
+        const columns = xlsxFileService.extractColumnsFromJSON(obj);
+        newWorksheet.columns = columns;
+        await workbook.xlsx.writeFile("ExcelFiles/export.xlsx");
+    };
 
-    await workbook.xlsx.writeFile("ExcelFiles/main.xlsx");
+    worksheet = workbook.getWorksheet(documentType);
+
+    // let rowObj = {};
+
+    // flattenedJSONprops.forEach(element => {
+    //     rowObj[`${element}`] = 
+    // })
+
+    // console.log(rowObj);
+
+
+    let newRow = worksheet.addRow(obj);
+
+    await newRow.commit();
+
+    await workbook.xlsx.writeFile("ExcelFiles/export.xlsx");
 
 }
 

@@ -70,3 +70,9 @@ exports.extractColumnsFromJSON = (JSON) => {
 
     return columns;
 }
+
+exports.updateWorksheetColumns = async (documentType) => {
+    const newHeaders = txtFileService.getExistingProps(documentType).filter(e => e.length > 0);
+
+    await this.addColumnsToXLSX(newHeaders, documentType);
+}
