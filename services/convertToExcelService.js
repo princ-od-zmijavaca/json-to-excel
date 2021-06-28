@@ -13,6 +13,14 @@ exports.getDocumentType = (JSONobj) => {
     return "0";
 }
 
+const getExportProps = (JSONobj) => {
+    if (JSONobj.props) {
+        const props = JSONobj.props;
+        return props;
+    }
+    return undefined;
+}
+
 exports.convertJSONobjectToExcel = async (obj, documentType) => {
 
     let workbook = new Excel.Workbook();
@@ -65,7 +73,6 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
     worksheet = workbook.getWorksheet(documentType);
 
     if (!worksheet) {
-        console.log("Nema worksheeta");
         let newWorksheet = workbook.addWorksheet(documentType);
         const columns = xlsxFileService.extractColumnsFromJSON(obj);
         newWorksheet.columns = columns;
@@ -74,20 +81,30 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
 
     worksheet = workbook.getWorksheet(documentType);
 
-    // let rowObj = {};
+    const propsToBeExported = getExportProps(obj);
 
-    // flattenedJSONprops.forEach(element => {
-    //     rowObj[`${element}`] = 
-    // })
+    if (propsToBeExported) {
 
-    // console.log(rowObj);
+        let excelRow = {};
+
+        propsToBeExported.forEach(element => {
+            excelRow[`${element}`] = obj[element];
+        });
+
+        console.log(excelRow);
+
+    } else {
+        let newRow = worksheet.addRow(obj);
 
 
-    let newRow = worksheet.addRow(obj);
+        //Commit for adding withhout saving
 
-    await newRow.commit();
+        await newRow.commit();
 
-    await workbook.xlsx.writeFile("ExcelFiles/export.xlsx");
 
+        //Write to file
+
+        // await workbook.xlsx.writeFile("ExcelFiles/export.xlsx");
+    }
 }
 
