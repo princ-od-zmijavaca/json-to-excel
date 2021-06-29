@@ -1,4 +1,3 @@
-const Excel = require("exceljs");
 const fs = require("fs");
 const txtFileService = require("../services/txtFileServices");
 const xlsxFileService = require("../services/xlsxFileServices");
@@ -24,9 +23,8 @@ const getExportProps = (JSONobj) => {
     return undefined;
 }
 
-exports.convertJSONobjectToExcel = async (obj, documentType) => {
+exports.convertJSONobjectToExcel = async (obj, documentType, workbook) => {
 
-    var workbook = new Excel.Workbook();
     let worksheet = workbook.getWorksheet(documentType);
 
     // 1 to 1, each prop is pair of another on same index
@@ -38,7 +36,7 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
     const doctypeExists = txtFileService.docTypeExists(documentType);
     if (!doctypeExists) {
         //#region Adding Fields To Document And Creating Document
-        txtFileService.createDocumentType(documentType);
+        await txtFileService.createDocumentType(documentType);
         txtFileService.addPropsToDoc(flattenedJSONprops, documentType);
         //#endregion
     } else {
@@ -61,17 +59,17 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
 
 
     try {
-        fs.statSync("ExcelFiles/export.xlsx");
-        await workbook.xlsx.readFile("ExcelFiles/export.xlsx");
+        fs.statSync("./ExcelFiles/export.xlsx");
+        await workbook.xlsx.readFile("./ExcelFiles/export.xlsx");
     } catch (error) {
         const newWorksheet = workbook.addWorksheet("test");
         newWorksheet.columns = xlsxFileService.extractColumnsFromJSON(obj);
-        await workbook.xlsx.writeFile("ExcelFiles/export.xlsx");
+        await workbook.xlsx.writeFile("./ExcelFiles/export.xlsx");
         console.log("Error finding file -> main.xlsx", error.message);
-        console.log("CREATE FILE ExcelFiles/export.xlsx");
+        console.log("CREATE FILE ./ExcelFiles/export.xlsx");
     }
 
-    await workbook.xlsx.readFile("ExcelFiles/export.xlsx");
+    await workbook.xlsx.readFile("./ExcelFiles/export.xlsx");
 
     worksheet = workbook.getWorksheet(documentType);
 
@@ -79,7 +77,7 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
         let newWorksheet = workbook.addWorksheet(documentType);
         const columns = xlsxFileService.extractColumnsFromJSON(obj);
         newWorksheet.columns = columns;
-        await workbook.xlsx.writeFile("ExcelFiles/export.xlsx");
+        await workbook.xlsx.writeFile("./ExcelFiles/export.xlsx");
     };
 
     worksheet = workbook.getWorksheet(documentType);
@@ -96,20 +94,22 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
             excelRow[`${element}`] = obj[element];
         });
 
-        console.log(excelRow);
 
         let newRow = worksheet.addRow(obj);
-        await newRow.commit();
+        // await newRow.commit();
 
         //Add props to JSON body
 
     } else {
-        let newRow = worksheet.addRow(obj);
+        
+        // await newRow.commit();
 
-        newRow.commit();
-
-        await workbook.xlsx.writeFile("ExcelFiles/export.xlsx");
 
     }
+    let newRow = worksheet.addRow(obj);
+    await newRow.commit();
+
+    return workbook;
+
 }
 

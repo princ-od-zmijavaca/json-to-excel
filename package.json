@@ -20,7 +20,6 @@
     "async-wait-until": "^2.0.7",
     "exceljs": "^4.2.1",
     "express": "^4.17.1",
-    "flat": "^5.0.2",
-    "sleep": "^6.3.0"
+    "flat": "^5.0.2"
   }
 }

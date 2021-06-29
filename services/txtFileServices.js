@@ -17,21 +17,21 @@ exports.createDocumentType = async (documentType) => {
 
 exports.addPropsToDoc = (propsArr, documentType) => {
     const data = propsArr.join() + ",";
-
-    fs.appendFile(path.join("DocumentTypes", `${documentType.toString()}.txt`), data, (err, data) => {
-        if (err) console.log("Error joining files");
-    });
+    try {
+        fs.appendFileSync(path.join("DocumentTypes", `${documentType.toString()}.txt`), data);
+    } catch (error) {
+        if (error) console.log("Error joining files");
+    }
 }
 
 exports.txtFileNeedsUpdate = (JSONobj, documentType) => {
     const incomingPropArr = APIservices.flattenJSONandGetProps(JSONobj);
-    const existingProps = fs.readFileSync(path.join("DocumentTypes", `${documentType.toString()}.txt`), 'utf8', (err, data) => {
-        if (err) {
-            console.log("Error reading file");
-        } else {
-            return data;
-        }
-    });
+    let existingProps = [];
+    try {
+        existingProps = fs.readFileSync(path.join("DocumentTypes", `${documentType.toString()}.txt`), 'utf8');
+    } catch (error) {
+        console.log("Error reading file");
+    }
 
     const existingPropArr = existingProps.split(",");
 
@@ -53,13 +53,12 @@ exports.txtFileNeedsUpdate = (JSONobj, documentType) => {
 }
 
 exports.getExistingProps = (documentType) => {
-    const existingProps = fs.readFileSync(path.join("DocumentTypes", `${documentType.toString()}.txt`), 'utf8', (err, data) => {
-        if (err) {
-            console.log("Error");
-        } else {
-            return data;
-        }
-    })
+    try {
+        const existingProps = fs.readFileSync(path.join("DocumentTypes", `${documentType.toString()}.txt`), 'utf8');
+        return existingProps.split(",");
 
-    return existingProps.split(",");
+    } catch (error) {
+        console.log("Error");
+        return [];
+    }
 }
