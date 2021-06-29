@@ -4,13 +4,16 @@ const txtFileService = require("../services/txtFileServices");
 const xlsxFileService = require("../services/xlsxFileServices");
 const APIservices = require("../services/APIservices");
 
-
 exports.getDocumentType = (JSONobj) => {
     const doctype = JSONobj.PkePredlozakTip;
     if (doctype) {
         return doctype.toString();
     }
     return "0";
+}
+
+exports.saveDocument = async () => {
+    console.log("Tu smo");
 }
 
 const getExportProps = (JSONobj) => {
@@ -23,7 +26,7 @@ const getExportProps = (JSONobj) => {
 
 exports.convertJSONobjectToExcel = async (obj, documentType) => {
 
-    let workbook = new Excel.Workbook();
+    var workbook = new Excel.Workbook();
     let worksheet = workbook.getWorksheet(documentType);
 
     // 1 to 1, each prop is pair of another on same index
@@ -85,6 +88,8 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
 
     if (propsToBeExported) {
 
+        console.log("Props Part");
+
         let excelRow = {};
 
         propsToBeExported.forEach(element => {
@@ -93,18 +98,18 @@ exports.convertJSONobjectToExcel = async (obj, documentType) => {
 
         console.log(excelRow);
 
+        let newRow = worksheet.addRow(obj);
+        await newRow.commit();
+
+        //Add props to JSON body
+
     } else {
         let newRow = worksheet.addRow(obj);
 
+        newRow.commit();
 
-        //Commit for adding withhout saving
+        await workbook.xlsx.writeFile("ExcelFiles/export.xlsx");
 
-        await newRow.commit();
-
-
-        //Write to file
-
-        // await workbook.xlsx.writeFile("ExcelFiles/export.xlsx");
     }
 }
 

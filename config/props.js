@@ -1,5 +1,5 @@
 //Add props to be exported
-// const props = []
+const props = [""]
 
 module.exports = {
 
